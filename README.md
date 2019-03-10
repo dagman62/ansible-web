@@ -1,5 +1,7 @@
 # Instructions for using this playbook
 
+## This playbook has one load balancer with three web hosts
+
 ## Run the docker compose file
 
 ```
