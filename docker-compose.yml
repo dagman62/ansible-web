@@ -27,7 +27,10 @@ services:
     domainname: example.com 
     hostname: control
     extra_hosts:
-      - "gitlab.example.com:192.168.1.116"
+      - "lb.example.com:192.168.61.11"
+      - "app1.example.com:192.168.61.12"
+      - "app2.example.com:192.168.61.13"
+      - "app3.example.com:192.168.61.15"
     restart: always
   lb:
     image: dagman62/ubuntu:sshd 
@@ -40,6 +43,10 @@ services:
     dns: 8.8.8.8
     domainname: example.com
     hostname: lb
+    extra_hosts:
+      - "app1.example.com:192.168.61.12"
+      - "app2.example.com:192.168.61.13"
+      - "app3.example.com:192.168.61.15"
     restart: always
   app1:
     image: dagman62/ubuntu:sshd 
