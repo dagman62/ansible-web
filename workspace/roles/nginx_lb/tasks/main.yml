@@ -1,0 +1,250 @@
+---
+# Os Specific
+ - name: Include os specific variables
+   include_vars: "{{ ansible_os_family }}.yml"
+
+ - name: Ensure group {{ nginx_group }} exists
+   group:
+     name: "{{ nginx_group }}"
+     gid: 501
+     state: present
+
+ - name: Add the user {{ nginx_user }}
+   user:
+     name: "{{ nginx_user }}"
+     comment: Nginx Admin User
+     shell: /bin/false
+     uid: 501
+     group: "{{ nginx_group }}"
+
+ - name: Install Build Tools
+   yum:
+     name: "@Development Tools"
+     state: present
+   when: ansible_os_family == "RedHat"
+
+ - name: Install all dependancies
+   package:
+     name: "{{ item }}"
+     state: present
+     update_cache: yes
+   with_items: "{{ nginx_dep_pkg }}"
+
+ - name: Install PPA Package Dependancies
+   apt_repository:
+     validate_certs: no
+     update_cache: yes
+     repo: ppa:maxmind/ppa
+     state: present
+   when: ansible_os_family == "Debian"
+
+ - name: Download PCRE version {{ pcre_ver }}
+   get_url:
+     url: "{{ pcre_tarball_url }}"
+     dest: "/tmp/{{ pcre_ver }}.tar.gz"
+   register: pcre_source
+
+ - name: Extract PCRE
+   unarchive:
+     copy: no
+     dest: /tmp/
+     src: "{{ pcre_source.dest }}"
+   register: pcre_source_extract
+
+ - name: Download zlib version {{ zlib_ver }}
+   get_url:
+     url: "{{ zlib_tarball_url }}"
+     dest: "/tmp/{{ zlib_ver }}.tar.gz"
+   register: zlib_source
+
+ - name: Extract zlib
+   unarchive:
+     copy: no
+     dest: /tmp/
+     src: "{{ zlib_source.dest }}"
+   register: zlib_source_extract
+
+ - name: Download OpenSSL {{ openssl_ver }}
+   get_url:
+     url: "{{ openssl_tarball_url }}"
+     dest: "/tmp/{{ openssl_ver }}.tar.gz"
+   register: openssl_source
+
+ - name: Extract OpenSSL
+   unarchive:
+     copy: no
+     dest: /tmp/
+     src: "{{ openssl_source.dest }}"
+   register: openssl_source_extract
+
+ - name: Download Nginx {{ nginx_ver }}
+   get_url:
+     url: "{{ nginx_tarball_url }}"
+     dest: "/tmp/{{ nginx_ver }}.tar.gz"
+   register: nginx_source
+
+ - name: Extract Nginx
+   unarchive:
+     copy: no
+     dest: /tmp/
+     src: "{{ nginx_source.dest }}"
+   when: nginx_source.changed
+   register: nginx_source_extract
+
+ - name: Configure nginx
+   command: "./configure
+            --prefix=/etc/nginx \
+            --sbin-path=/usr/sbin/nginx \
+            --modules-path=/usr/lib/nginx/modules \
+            --conf-path=/etc/nginx/nginx.conf \
+            --error-log-path=/var/log/nginx/error.log \
+            --pid-path=/var/run/nginx.pid \
+            --lock-path=/var/run/nginx.lock \
+            --user=nginx --group=nginx \
+            --build=Ubuntu --builddir=nginx-1.15.0 \
+            --with-select_module --with-poll_module \
+            --with-threads --with-file-aio \
+            --with-http_ssl_module \
+            --with-http_v2_module \
+            --with-http_realip_module \
+            --with-http_addition_module \
+            --with-http_xslt_module=dynamic \
+            --with-http_image_filter_module=dynamic \
+            --with-http_geoip_module=dynamic \
+            --with-http_sub_module \
+            --with-http_dav_module \
+            --with-http_flv_module \
+            --with-http_mp4_module \
+            --with-http_gunzip_module \
+            --with-http_gzip_static_module \
+            --with-http_auth_request_module \
+            --with-http_random_index_module \
+            --with-http_secure_link_module \
+            --with-http_degradation_module \
+            --with-http_slice_module \
+            --with-http_stub_status_module \
+            --with-http_perl_module=dynamic \
+            --with-perl_modules_path=/usr/share/perl/5.26.1 \
+            --with-perl=/usr/bin/perl \
+            --http-log-path=/var/log/nginx/access.log \
+            --http-client-body-temp-path=/var/cache/nginx/client_temp \
+            --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+            --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+            --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+            --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+            --with-mail=dynamic \
+            --with-mail_ssl_module \
+            --with-stream=dynamic \
+            --with-stream_ssl_module \
+            --with-stream_realip_module \
+            --with-stream_geoip_module=dynamic \
+            --with-stream_ssl_preread_module \
+            --with-compat \
+            --with-pcre={{ pcre_install_dir }} \
+            --with-pcre-jit \
+            --with-zlib={{ zlib_install_dir }} \
+            --with-openssl={{ openssl_install_dir }} \
+            --with-openssl-opt=no-nextprotoneg \
+            --with-debug"
+   args:
+     chdir: "{{ nginx_install_dir }}"
+   when: nginx_source_extract|changed
+   register: nginx_configure
+
+ - name: Install Nginx
+   shell: make && make install
+   args:
+     chdir: "{{ nginx_install_dir }}"
+   when: nginx_configure|changed
+
+ - name: copy man nginx man page from source
+   copy:
+     src: "/tmp/{{ nginx_ver }}/man/nginx.8"
+     dest: "/usr/share/man/man8/nginx.8"
+     remote_src: yes
+
+ - name: Gzip main page
+   archive:
+     path: "/usr/share/man/man8/nginx.8"
+     dest: "/usr/share/man/man8/nginx.8.gz"
+     format: gz
+     remove: yes
+
+ - name: Create nginx working directories
+   file:
+     path: "{{ item }}"
+     state: directory
+     recurse: yes
+     owner: "{{ nginx_user }}"
+     group: root
+   with_items:
+     - "/var/cache/nginx/client_temp"
+     - "/var/cache/nginx/fastcgi_temp"
+     - "/var/cache/nginx/proxy_temp"
+     - "/var/cache/nginx/scgi_temp"
+     - "/var/cache/nginx/uwsgi_temp"
+
+ - name: Copy service to systemd
+   template:
+     src: nginx.service.j2
+     dest: "/etc/systemd/system/nginx.service"
+     owner: root
+     group: root
+     mode: 0755
+
+ - name: Create nginx configuration directories
+   file:
+     path: "{{ item }}"
+     state: directory
+     owner: root
+     group: root
+   with_items:
+     - "/etc/nginx/conf.d"
+     - "/etc/nginx/sites-enabled"
+     - "/etc/nginx/sites-available"
+
+ - name: Copy over default template
+   template:
+     src: default.j2
+     dest: "/etc/nginx/sites-available/default"
+     owner: root
+     group: root
+     mode: 0644
+
+ - name: Symlink default to enabled sites
+   file:
+     src: "/etc/nginx/sites-available/default"
+     dest: "/etc/nginx/sites-enabled/default"
+     owner: root
+     group: root
+     state: link
+
+ - name: Copy over config file to enable sites
+   template:
+     src: nginx.conf.j2
+     dest: "/etc/nginx/nginx.conf"
+     owner: root
+     group: root
+     mode: 0644
+ 
+ - name: Copy over nginx startup script 
+   template:
+     src: nginx.j2
+     dest: "/etc/init.d/nginx"
+     owner: root
+     group: root
+     mode: 0755
+
+ - name: Enable and Start nginx service
+   command: "/etc/init.d/nginx start"
+
+ - name: Open up firewall for web
+   firewalld:
+     service: "{{ item }}"
+     permanent: yes
+     state: enabled
+   with_items:
+     - http
+     - https
+   when: ansible_os_family == "RedHat"
+...

@@ -1,0 +1,17 @@
+---
+# Redhat specfic variables
+apache_dep_pkg:
+  - postgresql-devel
+  - expat-devel
+  - openssl-devel
+  - pcre-devel
+  - bzip2-devel
+  - libcurl-devel
+  - libxml2-devel
+  - libpng-devel
+  - libtool
+  - mariadb-devel
+  - wget
+  - vim
+  - curl
+  - tree

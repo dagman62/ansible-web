@@ -1,0 +1,11 @@
+---
+  - name: setting up load balancer 
+    hosts: lb
+    become: true
+    vars:
+      nginx_streams:
+        - "192.168.61.12"
+        - "192.168.61.13"
+        - "192.168.61.15"
+    roles: 
+      - { role: nginx_lb }

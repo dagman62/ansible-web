@@ -1,0 +1,23 @@
+---
+nginx_pid: /run/nginx.pid
+nginx_dep_pkg:
+  - build-essential
+  - git
+  - tree
+  - perl
+  - libperl-dev
+  - libgd3
+  - libgd-dev
+  - libgeoip1
+  - libgeoip-dev
+  - geoip-bin
+  - libxml2
+  - libxml2-dev
+  - libxslt1.1
+  - libxslt1-dev
+  - software-properties-common
+  - python
+  - python-apt
+  - python-pip
+  - wget
+  - curl

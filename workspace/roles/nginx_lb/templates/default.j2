@@ -1,0 +1,13 @@
+# this template goes in /etc/nginx/conf.d/load-balancer.conf
+upstream backend {
+{% for item in nginx_streams %}
+  server {{ item }};
+{% endfor %}
+}
+
+ server {
+  listen 80;
+    location / {
+      proxy_pass http://backend;
+    }
+ }

@@ -1,0 +1,241 @@
+---
+# tasks file for apache_php
+  - name: Import os specific variables
+    include_vars: "{{ ansible_os_family }}.yml"
+
+  - name: Create apache group
+    group:
+      name: "{{ apache_group }}"
+      gid: 501
+      system: yes
+      state: present
+
+  - name: Create apache user
+    user:
+      name: "{{ apache_user }}"
+      comment: Apache admin user
+      uid: 501
+      group: "{{ apache_group }}"
+      system: yes
+      state: present
+
+  - name: Install apache dependancies
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ apache_dep_pkg }}"
+
+  - name: Install Development tools
+    yum:
+      name: "@Development Tools"
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  - name: Downloading Apache APR sources
+    get_url:
+      url: "{{ apr_tarball_url }}"
+      dest: "/tmp/{{ apr_version }}.tar.gz"
+    register: apr_source
+
+  - name: Unpacking Apache APR
+    unarchive:
+      copy: no
+      dest: /tmp/
+      src: "{{ apr_source.dest }}"
+    when: apr_source.changed
+    register: apr_source_unpack
+
+  - name: Configuring Apache APR source
+    command: "./configure --prefix={{ apache_home }}"
+    args:
+      chdir: "{{ apr_install_dir }}"
+    when: apr_source_unpack|changed
+    register: apr_configure
+
+  - name: Installing Apache APR
+    become: yes
+    shell: make && make install
+    args:
+      chdir: "{{ apr_install_dir }}"
+    when: apr_configure|changed
+
+  - name: Downloading Apache APRU sources
+    get_url:
+      url: "{{ apru_tarball_url }}"
+      dest: "/tmp/{{ apru_version }}.tar.gz"
+    register: apru_source
+
+  - name: Unpacking Apache APRU
+    unarchive:
+      copy: no
+      dest: /tmp/
+      src: "{{ apru_source.dest }}"
+    when: apru_source.changed
+    register: apru_source_unpack
+
+  - name: Configuring Apache APRU source
+    command: "./configure --prefix={{ apache_home }} --with-apr={{ apache_home }}/bin/apr-1-config"
+    args:
+      chdir: "{{ apru_install_dir }}"
+    when: apru_source_unpack|changed
+    register: apru_configure
+
+  - name: Installing Apache APRU
+    become: yes
+    shell: make && make install
+    args:
+      chdir: "{{ apru_install_dir }}"
+    when: apru_configure|changed
+
+  - name: Downloading Apache sources
+    get_url:
+      url: "{{ apache_tarball_url }}"
+      dest: "/tmp/{{ apache_version }}.tar.gz"
+    register: apache_source
+
+  - name: Unpacking Apache
+    unarchive:
+      copy: no
+      dest: /tmp/
+      src: "{{ apache_source.dest }}"
+    when: apache_source.changed
+    register: apache_source_unpack
+
+  - name: Configuring Apache source
+    command: "./configure
+             --prefix={{ apache_home }} \
+             --enable-ssl --enable-proxy \
+             --enable-modules=all \
+             --enable-mods-shared=all \
+             --enable-module=so \
+             --enable-proxy-http \
+             --enable-proxy-balancer \
+             --enable-proxy-ajp \
+             --with-ssl --with-mpm=prefork \
+             --with-apr={{ apache_home }}/bin/apr-1-config \
+             --with-apr-util={{ apache_home }}/bin/apu-1-config \
+             --enable-cgi"
+    args:
+      chdir: "{{ apache_install_dir }}"
+    when: apache_source_unpack|changed
+    register: apache_configure
+
+  - name: Installing Apache
+    become: yes
+    shell: make && make install
+    args:
+      chdir: "{{ apache_install_dir }}"
+    when: apache_configure|changed
+
+  - name: Downloading PHP sources
+    get_url:
+      url: "{{ php_tarball_url }}"
+      dest: "/tmp/{{ php_version }}.tar.gz"
+    register: php_source
+
+  - name: Unpacking PHP
+    unarchive:
+      copy: no
+      dest: /tmp/
+      src: "{{ php_source.dest }}"
+    when: php_source.changed
+    register: php_source_unpack
+
+  - name: Configuring PHP source
+    command: "./configure
+              --prefix=/usr/local \
+              --with-zlib \
+              --enable-zip \
+              --enable-wddx \
+              --enable-sysvmsg \
+              --enable-sockets \
+              --enable-soap \
+              --enable-shmop \
+              --enable-embedded-mysqli \
+              --enable-mbstring \
+              --with-mhash \
+              --with-gettext \
+              --with-gd \
+              --enable-ftp \
+              --enable-exif \
+              --enable-dba \
+              --with-curl \
+              --enable-calendar \
+              --with-bz2 \
+              --enable-bcmath \
+              --enable-static \
+              --with-mysqli \
+              --with-pgsql \
+              --with-apxs2={{ apache_home }}/bin/apxs"
+    args:
+      chdir: "{{ php_install_dir }}"
+    when: php_source_unpack|changed
+    register: php_configure
+
+  - name: Installing PHP
+    become: yes
+    shell: make && make install
+    args:
+      chdir: "{{ php_install_dir }}"
+    when: php_configure|changed
+
+  - name: Creating Apache conf file
+    become: yes
+    template:
+      src: httpd.conf.j2
+      dest: "{{ apache_home }}/conf/httpd.conf"
+      owner: "{{ apache_user }}"
+      group: "{{ apache_group }}"
+      mode: 0644
+
+  - name: Change ownership recursively apache home
+    become: yes
+    file:
+      path: "{{ apache_home }}"
+      owner: "{{ apache_user }}"
+      group: "{{ apache_group }}"
+      recurse: yes
+
+  - name: Remove index.html
+    become: yes
+    file:
+      path: "{{ apache_home }}/htdocs/index.html"
+      state: absent
+
+  - name: Install index.php
+    become: yes
+    template:
+      src: index.php.j2
+      dest: "{{ apache_home }}/htdocs/index.php"
+      owner: "{{ apache_user }}"
+      group: "{{ apache_group }}"
+      mode: 0644
+
+  - name: Install Apache startup script
+    template:
+      src: apache.service.j2
+      dest: /etc/systemd/system/apache.service
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Starting Apache
+    command: "/opt/apache/bin/apachectl restart"
+
+  - name: Open up firewall for web
+    firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      state: enabled
+    with_items:
+      - http
+      - https
+    when: ansible_os_family == "RedHat"
+
+  - name: Open up Zone Port 80 to Public
+    firewalld:
+      port: 80/tcp
+      permanent: true
+      zone: public
+      state: enabled
+    when: ansible_os_family == "RedHat"

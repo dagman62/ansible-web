@@ -1,0 +1,16 @@
+---
+nginx_pid: /var/run/nginx.pid
+nginx_dep_pkg:
+  - perl
+  - perl-devel 
+  - gd-devel 
+  - geoip-devel 
+  - geoip 
+  - libxml2 
+  - libxml2-devel 
+  - libxslt 
+  - libxslt-devel 
+  - perl-ExtUtils-Embed.noarch
+  - curl
+  - wget
+  - git

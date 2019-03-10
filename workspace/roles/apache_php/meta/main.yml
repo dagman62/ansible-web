@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Gaetano Giacalone
+  description: Apache PHP install from source
+
+  license: "license (BSD)"
+
+  min_ansible_version: 2.4
+
+  platforms:
+  - name: Ubuntu
+    versions:
+      - bionic
+  - name: EL
+    versions:
+      - 7
+  galaxy_tags:
+    - apache
+    - web
+    - php
+
+dependencies: []

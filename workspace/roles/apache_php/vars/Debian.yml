@@ -1,0 +1,20 @@
+---
+# Debian specific variables
+apache_dep_pkg:
+  - default-libmysqlclient-dev
+  - default-libmysqld-dev
+  - postgresql-server-dev-all
+  - libexpat1-dev
+  - libssl-dev
+  - libpcre++-dev
+  - libxml++2.6-dev
+  - libtool-bin
+  - libbz2-dev
+  - libcurl4-nss-dev
+  - libpng-dev
+  - curl
+  - wget
+  - build-essential
+  - git
+  - tree
+  - vim
