@@ -19,7 +19,7 @@ docker exec -it control bash
 ```
 for i in lb app1 app2 app3
 do
-  ssh-keygen -i $i
+  ssh-copy-id -i $i
 done
 ```
 
