@@ -22,14 +22,14 @@ do
   ssh-copy-id -i $i
 done
 ```
+### The passwords is root
+
 ## for nginx lb 
 
 ```
 ssh-copy-id -i user@lb
 password=password
 ```
-
-### The passwords is root
 
 ## Change into the workspace directory and run the playbook
 
