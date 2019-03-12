@@ -4,7 +4,7 @@ This playbook installs three apache 2.4.38 with php 7.2.15 from source with APR 
 
 ## Use Case
 
-This playbook can be used to test out a distributed php web application
+This playbook can be used to test out a disposable distributed php web application. The docker-compose.yml file can be modified to include any static web content using volumes. The configurations are on /opt/apache/conf, and the static web content is located in /opt/apache/htdocs
 
 ## Instructions for using this playbook
 
