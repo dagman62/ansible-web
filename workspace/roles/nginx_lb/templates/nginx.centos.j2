@@ -6,21 +6,21 @@
 # description:  NGINX is an HTTP(S) server, HTTP(S) reverse \
 #               proxy and IMAP/POP3 proxy server
 # processname: nginx
-# config:      /etc/nginx/nginx.conf
-# config:      /etc/sysconfig/nginx
-# pidfile:     /var/run/nginx.pid
+# config:      {{ nginx_conf }}
+# config:      {{ nginx_sysconfig }}
+# pidfile:     {{ nginx_pid }}
 
 # Check that networking is up.
 [ "$NETWORKING" = "no" ] && exit 0
 
-nginx="/usr/sbin/nginx"
+nginx="{{ nginx_bin }}"
 prog=$(basename $nginx)
 
-NGINX_CONF_FILE="/etc/nginx/nginx.conf"
+NGINX_CONF_FILE="{{ nginx_conf }}"
 
-[ -f /etc/sysconfig/nginx ] && . /etc/sysconfig/nginx
+[ -f {{ nginx_sysconfig }} ] && . {{ nginx_sysconfig }}
 
-lockfile=/var/lock/subsys/nginx
+lockfile={{ nginx_lock }}
 
 make_dirs() {
    # make required directories

@@ -1,5 +1,9 @@
 ---
 nginx_pid: /var/run/nginx.pid
+nginx_bin: /usr/sbin/nginx
+nginx_conf: /etc/nginx/nginx.conf
+nginx_sysconfig: /etc/sysconfig/nginx
+nginx_lock: /var/lock/subsys/nginx
 nginx_dep_pkg:
   - perl
   - perl-devel 

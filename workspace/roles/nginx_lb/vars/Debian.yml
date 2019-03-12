@@ -1,5 +1,7 @@
 ---
-nginx_pid: /run/nginx.pid
+nginx_pid: /var/run/nginx.pid
+nginx_bin: /usr/sbin/nginx
+nginx_default: /etc/default/nginx
 nginx_dep_pkg:
   - build-essential
   - git
