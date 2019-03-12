@@ -17,10 +17,16 @@ docker exec -it control bash
 ## Copy ssh public key to hosts
 
 ```
-for i in lb app1 app2 app3
+for i in app1 app2 app3
 do
   ssh-copy-id -i $i
 done
+```
+## for nginx lb 
+
+```
+ssh-copy-id -i user@lb
+password=password
 ```
 
 ### The passwords is root
