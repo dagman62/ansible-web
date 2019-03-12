@@ -16,3 +16,6 @@ nginx_dep_pkg:
   - git
   - epel-release
   - daemonize
+  - firewalld
+  - python34
+  - python-firewall
