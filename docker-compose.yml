@@ -33,7 +33,7 @@ services:
       - "app3.example.com:192.168.61.15"
     restart: always
   lb:
-    image: dagman62/ubuntu:sshd 
+    image: dagman62/centos:sshd 
     container_name: lb
     ports:
        - "80:80"
