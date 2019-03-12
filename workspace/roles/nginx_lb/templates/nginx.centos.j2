@@ -47,7 +47,7 @@ start() {
     [ -f $NGINX_CONF_FILE ] || exit 6
     make_dirs
     echo -n $"Starting $prog: "
-    daemon $nginx -c $NGINX_CONF_FILE
+    daemonize $nginx -c $NGINX_CONF_FILE
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile

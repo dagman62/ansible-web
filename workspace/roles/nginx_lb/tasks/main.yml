@@ -234,6 +234,16 @@
      owner: root
      group: root
      mode: 0755
+   when: ansible_os_family == "Debian"
+
+ - name: Copy over nginx startup script 
+   template:
+     src: nginx.centos.j2
+     dest: "/etc/init.d/nginx"
+     owner: root
+     group: root
+     mode: 0755
+   when: ansible_os_family == "RedHat"
 
  - name: Enable and Start nginx service
    command: "/etc/init.d/nginx start"

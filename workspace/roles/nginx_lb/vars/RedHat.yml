@@ -14,3 +14,5 @@ nginx_dep_pkg:
   - curl
   - wget
   - git
+  - epel-release
+  - daemonize
