@@ -1,4 +1,8 @@
-# Instructions for using this playbook
+# About this playbook
+
+This playbook installs three apache 2.4.38 with php 7.2.15 from source with APR suppport with nginx backend as load balancer also compiled from source. It supports both Ubuntu and Centos.
+
+## Instructions for using this playbook
 
 ## This playbook has one load balancer with three web hosts
 
