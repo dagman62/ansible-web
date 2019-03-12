@@ -6,6 +6,15 @@ This playbook installs three apache 2.4.38 with php 7.2.15 from source with APR 
 
 This playbook can be used to test out a disposable distributed php web application. The docker-compose.yml file can be modified to include any static web content using volumes. The configurations are on /opt/apache/conf, and the static web content is located in /opt/apache/htdocs
 
+```
+Under app1 app2 app3 blocks
+
+volumes:
+  - ${pwd}/htdocs:/opt/apache/htdocs
+  
+ ```
+ ### Note that this has to be done before docker-compose and site.xml is done
+
 ## Instructions for using this playbook
 
 ## This playbook has one load balancer with three web hosts
