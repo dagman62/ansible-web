@@ -53,6 +53,8 @@ services:
     container_name: app1
     ports:
        - "81:80"
+    volumes:
+      - ${PWD}/htdocs:/opt/apache/htdocs
     networks:
       custom:
         ipv4_address: 192.168.61.12
@@ -65,6 +67,8 @@ services:
     container_name: app2
     ports:
       - "82:80"
+    volumes:
+      - ${PWD}/htdocs:/opt/apache/htdocs
     networks:
       custom:
         ipv4_address: 192.168.61.13
@@ -77,6 +81,8 @@ services:
     container_name: app3
     ports:
       - "83:80"
+    volumes:
+      - ${PWD}/htdocs:/opt/apache/htdocs
     networks:
       custom:
         ipv4_address: 192.168.61.15

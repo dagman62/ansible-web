@@ -247,6 +247,14 @@
 
  - name: Enable and Start nginx service
    command: "/etc/init.d/nginx start"
+   when: ansible_virtualization_type == "docker"
+
+ - name: Enable and startup nginx
+   service:
+     name: nginx
+     enabled: yes
+     state: started
+   when: ansible_virtualization_type != "docker"
 
  - name: Open up firewall for web
    firewalld:
